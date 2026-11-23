@@ -1,0 +1,77 @@
+name: Update pixel profile
+
+on:
+  workflow_dispatch:
+    inputs:
+      title:
+        description: '学習記録のタイトル（空欄なら同期だけ）'
+        required: false
+        type: string
+      kind:
+        description: '活動の種類'
+        type: choice
+        options: [study, feat, fix, refactor, test, docs, release, qualification]
+        default: study
+      stat:
+        description: '経験値を加える分野'
+        type: choice
+        options: [math, electric, code, design, test, share]
+        default: math
+  schedule:
+    - cron: '17 * * * *' # 毎時17分の補完同期。実行が遅れる場合があります。
+  push:
+    paths:
+      - 'profile.json'
+      - 'data/activities.json'
+      - 'scripts/**'
+      - 'assets/**'
+      - 'tests/**'
+      - '.github/workflows/profile.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pixel-profile
+  cancel-in-progress: false
+
+jobs:
+  update:
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+        with:
+          python-version: '3.12'
+      - name: Test
+        run: python -m unittest discover -s tests -v
+      - name: Add manual activity
+        if: github.event_name == 'workflow_dispatch' && inputs.title != ''
+        env:
+          ACTIVITY_TITLE: ${{ inputs.title }}
+          ACTIVITY_KIND: ${{ inputs.kind }}
+          ACTIVITY_STAT: ${{ inputs.stat }}
+        run: >-
+          python scripts/profile.py add
+          --id "manual:workflow-${GITHUB_RUN_ID}"
+          --kind "$ACTIVITY_KIND"
+          --stat "$ACTIVITY_STAT"
+          --title "$ACTIVITY_TITLE"
+      - name: Collect GitHub activity and render
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PROFILE_READ_TOKEN: ${{ secrets.PROFILE_READ_TOKEN }}
+          PROFILE_SOURCE_REPOS: ${{ secrets.PROFILE_SOURCE_REPOS }}
+        run: python scripts/profile.py sync
+      - name: Save updated profile
+        run: |
+          git config user.name 'pixel-profile[bot]'
+          git config user.email 'pixel-profile@users.noreply.github.com'
+          git add generated/ data/github.json data/activities.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'chore: update pixel profile [skip ci]'
+            git push
+          fi

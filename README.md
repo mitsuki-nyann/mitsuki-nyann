@@ -1,3 +1,17 @@
+# みつき / PIXEL PROFILE
+
+![みつきのDS風ステータス](generated/profile.svg)
+
+数学・電気・プログラミング。学んで、小さく作る。
+
+- 能力値：取り組んだPRと学習記録の累積EXP
+- タイプ・特性：直近20件のマージ済みPRから自動更新
+- 習得中：第二種電気工事士（学科合格）
+
+[編集・使い方](GUIDE.md) · [非公開PRの接続設定](CONNECT_PRIVATE.md) · [自動更新](https://github.com/mitsuki-nyann/mitsuki-nyann/actions)
+
+---
+
 ## Hi there 👋
 
 <!--

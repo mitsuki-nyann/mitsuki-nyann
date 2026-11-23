@@ -1,0 +1,32 @@
+{
+  "name": "みつき",
+  "handle": "mitsuki-nyann",
+  "types": ["ELECTRIC", "CODE"],
+  "trait": "好奇心で動く / 作って理解する",
+  "bio": "数学・電気・プログラミング。学んで、小さく作る。",
+  "xp_per_level": 100,
+  "stats": {
+    "math": "数学", "electric": "電気", "code": "実装",
+    "design": "設計", "test": "検証", "share": "共有"
+  },
+  "rules": {
+    "feat": {"xp": 30, "stat": "code", "label": "機能を追加"},
+    "fix": {"xp": 15, "stat": "code", "label": "不具合を修正"},
+    "refactor": {"xp": 20, "stat": "design", "label": "構成を整理"},
+    "test": {"xp": 15, "stat": "test", "label": "テストを追加"},
+    "docs": {"xp": 15, "stat": "share", "label": "解説を作成"},
+    "study": {"xp": 10, "stat": "math", "label": "学習を記録"},
+    "release": {"xp": 50, "stat": "code", "label": "作品を公開"},
+    "qualification": {"xp": 100, "stat": "electric", "label": "資格を取得"}
+  },
+  "moves": [
+    {"name": "第二種電気工事士", "status": "習得中・学科合格", "mastered": false}
+  ],
+  "github": {
+    "actor": "mitsuki-nyann",
+    "since": "2026-11-23T00:00:00+09:00",
+    "sources": [
+      {"repo": "mitsuki-nyann/example-project", "mode": "commits"}
+    ]
+  }
+}

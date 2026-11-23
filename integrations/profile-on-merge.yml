@@ -1,0 +1,48 @@
+# Copy to each source repo at .github/workflows/profile-on-merge.yml.
+# Does not check out or execute PR code. Only dispatches the profile workflow.
+name: Refresh profile after merge
+on:
+  pull_request_target:
+    types: [closed]
+permissions: {}
+jobs:
+  notify:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Request profile refresh
+        env:
+          PROFILE_REPOSITORY: mitsuki-nyann/mitsuki-nyann
+          PROFILE_ACTOR: mitsuki-nyann
+          PROFILE_TOKEN: ${{ secrets.PROFILE_DISPATCH_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import json, os, re, sys
+          from urllib.request import Request, urlopen
+          from urllib.error import HTTPError
+          with open(os.environ['GITHUB_EVENT_PATH']) as f:
+              event = json.load(f)
+          if event['pull_request']['user']['login'].lower() != os.environ['PROFILE_ACTOR'].lower():
+              print('This PR is not by the profile owner. Skipped.')
+              sys.exit(0)
+          token = os.environ.get('PROFILE_TOKEN')
+          if not token:
+              sys.exit('Set PROFILE_DISPATCH_TOKEN, or use the hourly profile sync.')
+          repo = os.environ['PROFILE_REPOSITORY']
+          if not re.fullmatch(r'[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+', repo):
+              sys.exit('Invalid profile repository')
+          base = 'https://api.github.com/repos/' + repo
+          headers = {'Authorization': 'Bearer ' + token,
+                     'Accept': 'application/vnd.github+json', 'User-Agent': 'pixel-profile'}
+          try:
+              with urlopen(Request(base, headers=headers), timeout=30) as r:
+                  branch = json.load(r)['default_branch']
+              data = json.dumps({'ref': branch}).encode()
+              headers['Content-Type'] = 'application/json'
+              request = Request(base + '/actions/workflows/profile.yml/dispatches',
+                                data=data, headers=headers, method='POST')
+              with urlopen(request, timeout=30) as r:
+                  print('Profile refresh requested:', r.status)
+          except HTTPError as exc:
+              sys.exit('GitHub HTTP ' + str(exc.code) + ': check token permissions and workflow setup')
+          PY

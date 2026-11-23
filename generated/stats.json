@@ -1,0 +1,22 @@
+{
+  "total_xp": 0,
+  "level": 1,
+  "level_xp": 0,
+  "next_level_xp": 100,
+  "remaining_xp": 100,
+  "stats": {
+    "math": 0,
+    "electric": 0,
+    "code": 0,
+    "design": 0,
+    "test": 0,
+    "share": 0
+  },
+  "events": [],
+  "types": [
+    "NORMAL"
+  ],
+  "trait": "はじまりの一歩 / PRを重ねて成長",
+  "type_stats": [],
+  "recent_pr_count": 0
+}
